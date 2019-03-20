@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/sherrycp/repo-post-nlb:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/sherrycp/repo-post-nlb:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: repo-post-nlb
+        chartPath: charts/repo-post-nlb
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/sherrycp/repo-post-nlb'
+          image.tag: '{{.DIGEST_HEX}}'
